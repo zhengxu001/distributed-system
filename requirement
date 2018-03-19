@@ -3,25 +3,19 @@ Master only take care of updating the membership, does not take care of making d
 1. Forming, joining, and leaving groups
 - Forming with the master node (Done)
 - Joining and get the membership (Done)
-- Leaving and update the membership
+- Leaving and update the membership(Done)
 
-2. Monitoring group members and reporting member failures to the remaining members
--
--
--
-3. Returning the current group membership when required
--
--
--
+2. Monitoring group members and reporting member failures to the remaining members(Done)
+
+3. Returning the current group membership when required(In Progress)
+
 4. Possibly providing a ranking of members(based on age)
--
--
--
+- Add a new item: age
+
 6. The exercise is simply to design, implement and demonstrate a group membership management service that provides the (remaining) members a group with a consistent view of its membership at any time and that tolerates the full range of failures that commonly arise in
 tributed systems, (e.g., node or process failure, loss messages, and/or network partitions etc)
 Consistent group view(eventual consistency)
-8. Each group view will differ from the previous group view by the addition or deletion of exactly one member and the same sequence of group ws should be available to each process over time.
-9. Hence, when a process sends a message, it is sent in the context of the sender’s current group view and the receiver can assess whether  view has changed on reception and act accordingly.
+8. Each group view will differ from the previous group view by the addition or deletion of exactly one member and the same sequence of group ws should be available to each process over time. Hence, when a process sends a message, it is sent in the context of the sender’s current group view and the receiver can assess whether view has changed on reception and act accordingly.
  easy to demo
 
  保证master的timeout时间永远比slave大
