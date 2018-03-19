@@ -4,14 +4,19 @@ class Membership
   def initialize(master, slave = [])
     @master = master
     @slave = slave
-    @all_nodes = slave << master
+    @all_nodes = (slave << master)
+    @total_number = @all_nodes.uniq.size
+  end
+
+  def update
+    @all_nodes = @slave + [@master]
     @total_number = @all_nodes.uniq.size
   end
 
   def to_json
     {
       master: @master,
-      slave: @slave.uniq,
+      slave: @slave,
       all_nodes: @all_nodes.uniq,
       total_number: @total_number
     }.to_json
