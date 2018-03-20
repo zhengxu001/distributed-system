@@ -146,9 +146,9 @@ class Node
       socket.close
   rescue => e
     p e
-    # if(e.message.include? "Connection refused")
-    #   @membership.all_nodes = @membership.all_nodes - [recipient_port]
-    # end
+    if(e.message.include? "Connection refused")
+      @membership.all_nodes = @membership.all_nodes - [recipient_port]
+    end
   end
 
   def log_heartbeat_reply(msg)
