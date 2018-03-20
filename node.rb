@@ -30,8 +30,8 @@ class Node
       acknowledgement: :already_slave,
     },
     CANDIDATE => {
-      # timeout: :launch_candidacy,
-      timeout: :partitioning,
+      timeout: :launch_candidacy,
+      # timeout: :partitioning,
       vote_request: :handle_vote_request,
       vote: :handle_vote,
       # heartbeat: :respond_to_heartbeat,
@@ -146,6 +146,9 @@ class Node
       socket.close
   rescue => e
     p e
+    # if(e.message.include? "Connection refused")
+    #   @membership.all_nodes = @membership.all_nodes - [recipient_port]
+    # end
   end
 
   def log_heartbeat_reply(msg)
@@ -235,7 +238,7 @@ class Node
 
   def send_heartbeats
     p("Start Send Heartbeat to Slaves #{@membership.slave}")
-    @membership.slave.each do |port|
+    (@membership.all_nodes - [@port_num]).each do |port|
       send_message(:heartbeat, port, @round_num, @membership.to_json)
     end
   end
@@ -273,7 +276,7 @@ class Node
   end
 
   def has_majority?(count)
-    count >= (@membership.total_number / 2) + 1
+    count >= (@membership.all_nodes.size / 2) + 1
   end
 end
 
