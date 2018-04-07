@@ -1,5 +1,5 @@
 class Membership
-  attr_accessor :master, :slave, :version, :all_nodes, :total_number
+  attr_accessor :master, :slave, :all_nodes, :total_number
 
   def initialize(master, slave = [])
     @master = master

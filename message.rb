@@ -1,5 +1,5 @@
 class Message
-  attr_accessor :type, :timeout, :heartbeat, :vote_request, :round_num, :sender, :value
+  attr_accessor :type, :round_num, :sender, :value
 
   def initialize(message, sender, round_num, value = nil)
     @type = message
