@@ -1,9 +1,14 @@
 Master only take care of updating the membership, does not take care of making decision.
 
-1. Forming, joining, and leaving groups
-- Forming with the master node (Done)
-- Joining and get the membership (Done)
-- Leaving and update the membership(Done)
+Done:
+- Forming group with one master node (Done)
+- Joining group and get the membership (Done)
+- Leaving and update the membership for all left nodes(Done)
+
+ToDo:
+- Dealing with Network partitions
+- Returning the current group membership when required
+- GUI for command
 
 2. Monitoring group members and reporting member failures to the remaining members(Done)
 
