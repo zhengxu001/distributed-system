@@ -19,6 +19,7 @@ class Node
       vote_request: :handle_vote_request,
       ask_for_membership: :return_membership,
       vote: :already_master,
+      grep_membership: :response_membership
     },
     SLAVE => {
       timeout: :launch_candidacy,
@@ -26,8 +27,10 @@ class Node
       heartbeat: :update_membership,
       vote_request: :handle_vote_request,
       return_membership: :update_membership,
+      ask_for_membership: :return_membership,
       vote: :already_slave,
       acknowledgement: :already_slave,
+      grep_membership: :response_membership
     },
     CANDIDATE => {
       timeout: :launch_candidacy,
@@ -36,7 +39,9 @@ class Node
       vote: :handle_vote,
       # heartbeat: :respond_to_heartbeat,
       heartbeat: :update_membership,
+      ask_for_membership: :return_membership,
       acknowledgement: :already_slave,
+      grep_membership: :response_membership
     },
   }
 
@@ -172,6 +177,11 @@ class Node
     send_message(:ask_for_membership, recipient_port)
   end
 
+  def grep_membership(recipient_port)
+    p("grep membership from: ", recipient_port)
+    send_message(:grep_membership, recipient_port)
+  end
+
   def get_membership(msg)
     p "get_membership"
     v = JSON.parse msg["value"]
@@ -183,8 +193,14 @@ class Node
   def return_membership(msg)
     p "return_membership to #{msg.sender}"
     send_message(:return_membership, msg.sender, @round_num, @membership.to_json)
-    # add_new_node(msg.sender)
+    add_new_node(msg.sender)
   end
+
+  def response_membership(msg)
+    p "response_membership to #{msg.sender}"
+    send_message(:response_membership, msg.sender, @round_num, @membership.to_json)
+  end
+
 
   def respond_to_heartbeat(msg)
     if msg.round_num >= @round_num

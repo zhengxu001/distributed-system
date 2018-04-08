@@ -1,3 +1,5 @@
+require 'json'
+
 class Message
   attr_accessor :type, :round_num, :sender, :value
 
