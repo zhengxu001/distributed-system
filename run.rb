@@ -58,7 +58,7 @@ loop do
   rows = []
   rows << [1, "Kill One Node"]
   rows << [2, "Kill Multiple Nodes"]
-  rows << [3, "Grep Membership of a Group"]
+  rows << [3, "Grep Membership from a Node"]
   rows << [4, "List of all the Groups"]
   rows << [5, "Terminate A Group"]
   table = Terminal::Table.new :rows => rows
@@ -84,24 +84,25 @@ loop do
       system "kill $(lsof -t -i:#{port.to_i})"
     end
   when 3
-  	p "Please Enter the Group Name"
-  	# temp_port = 9999
-   #  t1 = Thread.new { listen }
-   #  t2 = Thread.new { ask_for_membership(gets.gsub("\n", ""), 9999) }
-   #  threads = [t1, t2]
-   #  threads.each(&:join)
-    group_name = gets.gsub("\n", "")
-    begin
-      groups = JSON.parse File.read("group_list")
-    rescue
-      groups = []
-    end
-    terminate_nodes = []
-    groups.each do |group|
-      if group["group_name"] == group_name
-        p group
-      end
-    end
+  	p "Please Enter the Node Port"
+  	temp_port = 9999
+    t1 = Thread.new { listen }
+    t2 = Thread.new { send_message(:ask_for_membership, gets.to_i, 9999) }
+    # t2 = Thread.new { ask_for_membership(, ) }
+    threads = [t1, t2]
+    threads.each(&:join)
+    # group_name = gets.gsub("\n", "")
+    # begin
+    #   groups = JSON.parse File.read("group_list")
+    # rescue
+    #   groups = []
+    # end
+    # terminate_nodes = []
+    # groups.each do |group|
+    #   if group["group_name"] == group_name
+    #     p group
+    #   end
+    # end
   when 4
     p "List of all the Groups"
     begin

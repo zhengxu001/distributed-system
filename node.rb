@@ -139,7 +139,6 @@ class Node
     if msg.round_num >= @round_num
       @committers << msg.sender
     end
-    p 
     if has_majority?(@committers.count + 1.5)
       if msg.value.is_a?(Hash)
         puts "Commited The Join Requests".red
@@ -147,6 +146,7 @@ class Node
         @round_num = @round_num + 1
         @membership.slave << msg.value
         @membership = Membership.new(@group_name, @membership.master, @membership.slave)
+        @committers = []
       elsif msg.value.is_a?(Array)
         puts "Commited Deleting Faild Nodes".red
         @round_num = @round_num + 1
@@ -168,6 +168,7 @@ class Node
       slave = @membership.slave.delete_if { |node| node["port_num"] == @port_num}
       master = {"node_num" => @node_num, "port_num" => @port_num}
       @membership = Membership.new(@group_name, master, slave)
+      @round_num = @round_num + 1
       puts "#{prefix} Win the Election".red
       @last_heartbeat = Time.now.to_f
       @committers = []
@@ -177,12 +178,12 @@ class Node
   end
 
   def update_membership(msg)
-    raw_membership = msg.value
+    # raw_membership = msg.value
     if msg.round_num >= @round_num
-      puts "#{prefix} Updating Local Membership".blue
-      @membership = Membership.new(@group_name, raw_membership["master"], raw_membership["slave"])
+      puts "#{prefix} Updating Local Membership".red
+      @membership = Membership.new(@group_name, msg.value["master"], msg.value["slave"])
       @round_num = msg.round_num
-      # acknowledge_heartbeat(msg)
+      acknowledge_heartbeat(msg)
     end
   end
 
@@ -346,7 +347,16 @@ class Node
     if @membership.all_nodes.size == 2 && count >=1
       return true
     end
-    count >= (@membership.all_nodes.size + 1) / 2
+    # temp = 0
+    # if (count % 1) == 0.5
+    #   temp = count - 0.5
+    # end
+
+    if (@membership.all_nodes.size%2) == 0
+      return count > @membership.all_nodes.size / 2
+    else
+      return count >= @membership.all_nodes.size / 2 + 1
+    end
   end
 end
 
