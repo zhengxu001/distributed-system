@@ -12,9 +12,9 @@ ToDo:
 
 2. Monitoring group members and reporting member failures to the remaining members(Done)
 
-3. Returning the current group membership when required(In Progress)
+3. Returning the current group membership when required(Done)
 
-4. Possibly providing a ranking of members(based on age)
+4. Possibly providing a ranking of members(Dropped)
 - Add a new item: age
 
 6. The exercise is simply to design, implement and demonstrate a group membership management service that provides the (remaining) members a group with a consistent view of its membership at any time and that tolerates the full range of failures that commonly arise in
