@@ -1,0 +1,15 @@
+Functions:
+- Forming group with one master node (Done)
+- Joining group and get the membership (Done)
+- Leaving and update the membership for all left nodes(Done)
+- Dealing with Network partitions(Done)
+- Returning the current group membership when required(Done)
+- GUI for command
+
+Systerm Requirement:
+- Install Ruby 2.1: https://www.ruby-lang.org/en/documentation/installation/
+- gem install colorize
+- gem install json
+- gem install socket
+
+
