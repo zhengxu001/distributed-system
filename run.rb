@@ -1,3 +1,4 @@
+require 'terminal-table'
 require 'socket'
 require 'json'
 require_relative 'membership'
@@ -54,10 +55,20 @@ rescue => e
 end
 
 loop do
-  p "1. Kill One Node"
-  p "2. Kill Multiple Nodes"
-  p "3. Grep Current Membership"
+  rows = []
+  rows << [1, "Kill One Node"]
+  rows << [2, "Kill Multiple Nodes"]
+  rows << [3, "Grep Membership of a Group"]
+  rows << [4, "List of all the Groups"]
+  rows << [5, "Terminate A Group"]
+  table = Terminal::Table.new :rows => rows
+  puts table
   p "Please Input your Option"
+  # p "2. "
+  # p "3. Grep Membership of a Group"
+  # p "4. List of all the Groups"
+  # p "5. List of all the Groups"
+  # p "Please Input your Option"
   option = gets.to_i
   case option
   when 1
@@ -74,11 +85,52 @@ loop do
     end
   when 3
   	p "Please Enter the Group Name"
-  	temp_port = 9999
-    t1 = Thread.new { listen }
-    t2 = Thread.new { ask_for_membership(gets.gsub("\n", ""), 9999) }
-    threads = [t1, t2]
-    threads.each(&:join)
+  	# temp_port = 9999
+   #  t1 = Thread.new { listen }
+   #  t2 = Thread.new { ask_for_membership(gets.gsub("\n", ""), 9999) }
+   #  threads = [t1, t2]
+   #  threads.each(&:join)
+    group_name = gets.gsub("\n", "")
+    begin
+      groups = JSON.parse File.read("group_list")
+    rescue
+      groups = []
+    end
+    terminate_nodes = []
+    groups.each do |group|
+      if group["group_name"] == group_name
+        p group
+      end
+    end
+  when 4
+    p "List of all the Groups"
+    begin
+      groups = JSON.parse File.read("group_list")
+    rescue
+      groups = []
+    end
+    p groups
+  when 5
+    p "Terminate A Group! Please Enter the Group Name:"
+    group_name = gets.gsub("\n", "")
+    begin
+      groups = JSON.parse File.read("group_list")
+    rescue
+      groups = []
+    end
+    terminate_nodes = []
+    groups.each do |group|
+      if group["group_name"] == group_name
+        group["all_nodes"].each do |node|
+          terminate_nodes << node["port_num"]
+        end
+      end
+    end
+    terminate_nodes.each do |port|
+      p port
+      delete_json(port.to_i)
+      system "kill $(lsof -t -i:#{port.to_i})"
+    end
   else
       p "No Such Command Supported"
       exit()
