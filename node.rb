@@ -56,22 +56,22 @@ class Node
   end
 
 
-  def initialize(node_num, group_name, port, create_group = true)
+  def initialize(node_num, group_name, port, create_group = false)
     @node_num = node_num
     @port_num = port
     @group_name = group_name
     @task_queue = Queue.new
     @threads = []
     @server = TCPServer.new(@port_num)
-    # if create_group == "true"
-    #   @state = MASTER
-    #   @round_num = 0
-    #   if GroupList.list_name.include? group_name
-    #     Membership.delete_gruop(group_name)
-    #   end
-    #   master = {"node_num" => node_num, "port_num" => port}
-    #   @membership = Membership.new(group_name, master)
-    # else
+    if create_group == "true"
+      @state = MASTER
+      @round_num = 0
+      if GroupList.list_name.include? group_name
+        Membership.delete_gruop(group_name)
+      end
+      master = {"node_num" => node_num, "port_num" => port}
+      @membership = Membership.new(group_name, master)
+    else
       if !GroupList.list_name.include? group_name
         p "No Such Group Existed. Creating a New Group"
         @state = MASTER
@@ -83,7 +83,7 @@ class Node
         @state = SLAVE
         join_request(group_name)
       end
-    # end
+    end
     @last_heartbeat = Time.now.to_f
     @repliers = []
     @voters = []
