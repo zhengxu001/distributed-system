@@ -10,12 +10,23 @@ def listen()
     socket = @server.accept
     raw_message = socket.gets
     raw_msg = JSON.parse(raw_message)
-    p raw_msg["value"]
-    p "\n"
+    puts (JSON.pretty_generate raw_msg["value"])
     socket.close
     break
     
   end
+end
+
+def delete_json(port_num)
+  begin
+    groups = JSON.parse File.read("group_list")
+  rescue
+    groups = []
+  end
+  groups.delete_if { |group| group["master"]["port_num"].to_i == port_num.to_i}
+  file = File.open("group_list", "w")
+  file.write JSON.pretty_generate(groups)
+  file.close
 end
 
 def ask_for_membership(group_name, portnum)
@@ -50,22 +61,26 @@ loop do
   option = gets.to_i
   case option
   when 1
-  	p "Please Enter the portnum of the Server"
-    system "kill $(lsof -t -i:#{gets.to_i})"
+  	p "Please Enter the Port Number of the Server"
+    port_num = gets.to_i
+    system "kill $(lsof -t -i:#{port_num})"
+    delete_json(port_num)
   when 2
-    p "Please Enter the 2 portnum of the Server"
+    p "Please Enter the Port Number of the Servers"
     ports = gets.split(" ")
     ports.each do |port|
+      delete_json(port.to_i)
       system "kill $(lsof -t -i:#{port.to_i})"
     end
   when 3
-  	p "Please Enter the Portnum You Want To Connect"
+  	p "Please Enter the Group Name"
   	temp_port = 9999
     t1 = Thread.new { listen }
     t2 = Thread.new { ask_for_membership(gets.gsub("\n", ""), 9999) }
     threads = [t1, t2]
     threads.each(&:join)
-    else
+  else
       p "No Such Command Supported"
+      exit()
   end
 end

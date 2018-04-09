@@ -5,16 +5,16 @@ threads =[]
 a = gets.to_i - 1
 MUTEX = Mutex.new
 
-def create_server(a,b,c,d)
-  server = Node.new(a, b, c, d);
+def create_server(a,b,c)
+  server = Node.new(a, b, c);
   server.run
 end
 
 for i in 0..a
 	p "Please Enter the first Role:"
-	a, b, c, d = gets.split(" ")
+	a, b, c = gets.split(" ")
 	threads << Thread.new do
-	  create_server(a, b, c, d)
+	  create_server(a, b, c)
 	end
 end
 p threads

@@ -63,27 +63,27 @@ class Node
     @task_queue = Queue.new
     @threads = []
     @server = TCPServer.new(@port_num)
-    if create_group == "true"
-      @state = MASTER
-      @round_num = 0
-      if GroupList.list_name.include? group_name
-        Membership.delete_gruop(group_name)
-      end
-      master = {"node_num" => node_num, "port_num" => port}
-      @membership = Membership.new(group_name, master)
-    else
+    # if create_group == "true"
+    #   @state = MASTER
+    #   @round_num = 0
+    #   if GroupList.list_name.include? group_name
+    #     Membership.delete_gruop(group_name)
+    #   end
+    #   master = {"node_num" => node_num, "port_num" => port}
+    #   @membership = Membership.new(group_name, master)
+    # else
       if !GroupList.list_name.include? group_name
-        p "No such group existed. Going to create a New Group"
+        p "No Such Group Existed. Creating a New Group"
         @state = MASTER
-        master = Pnode.new(node_num, port)
         @round_num = 0
+        master = {"node_num" => node_num, "port_num" => port}
         @membership = Membership.new(group_name, master)
       else
         @round_num = -1
         @state = SLAVE
         join_request(group_name)
       end
-    end
+    # end
     @last_heartbeat = Time.now.to_f
     @repliers = []
     @voters = []
@@ -217,6 +217,7 @@ class Node
 
   def acknowledge_heartbeat(msg)
     puts "#{prefix} Acknowledgement To Master".blue
+    @state = SLAVE
     @last_heartbeat = Time.now.to_f
     send_message(:acknowledgement, msg.sender["port_num"])
   end
@@ -235,7 +236,7 @@ class Node
     loop do
       msg = nil
       if timeout?
-        msg = Message.timeout_message(:timeout, {"node_num" => "node1", "port_num" => @port_num}, @round_num)
+        msg = Message.timeout_message(:timeout, {"node_num" => @node_num, "port_num" => @port_num}, @round_num)
       elsif !@task_queue.empty?
         msg = @task_queue.shift
       end
@@ -257,9 +258,9 @@ class Node
 
   def timeout?
     if @state == MASTER
-      Time.now.to_f - @last_heartbeat > rand(0.6...1.2)*2
+      Time.now.to_f - @last_heartbeat > rand(0.5...1)*2
     else
-      Time.now.to_f - @last_heartbeat > rand(2.4...4.2)*2
+      Time.now.to_f - @last_heartbeat > rand(2.5...5)*2
     end
   end
 
