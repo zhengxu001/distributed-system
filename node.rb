@@ -10,7 +10,7 @@ SLAVE = 'slave'
 CANDIDATE = 'candidate'
 
 class Node
-  attr_accessor :port_num, :state, :server, :membership, :task_queue, :repliers, :voters, :group_name, :node_num
+  attr_accessor :port_num, :state, :server, :membership, :task_queue, :repliers, :voters, :group_name, :node_num, :committers
 
   TRANSITIONS = {
     MASTER => {
@@ -20,6 +20,7 @@ class Node
       vote_request: :handle_vote_request,
       ask_for_membership: :return_membership,
       join_request: :confirm_join_request,
+      confirmed_request: :check_comitted,
       vote: :already_master,
       grep_membership: :response_membership
     },
@@ -28,7 +29,8 @@ class Node
       heartbeat: :acknowledge_heartbeat,
       vote_request: :handle_vote_request,
       return_membership: :update_membership,
-      confirm_join_request: :acknowledge_heartbeat,
+      confirm_join_request: :confirmed_request,
+      committed: :acknowledge_heartbeat,
       ask_for_membership: :return_membership,
       vote: :already_slave,
       acknowledgement: :already_slave,
@@ -38,6 +40,7 @@ class Node
       timeout: :launch_candidacy,
       vote_request: :handle_vote_request,
       vote: :handle_vote,
+      confirm_join_request: :confirmed_request,
       heartbeat: :acknowledge_heartbeat,
       ask_for_membership: :return_membership,
       acknowledgement: :already_slave,
@@ -87,6 +90,7 @@ class Node
     @last_heartbeat = Time.now.to_f
     @repliers = []
     @voters = []
+    @committers = []
   end
 
   def send_heartbeats
@@ -108,15 +112,65 @@ class Node
     end
   end
 
+  def confirm_join_request(msg)
+    if @membership.total_number == 1
+      puts "Committed The Join Request".red
+      @round_num = @round_num + 1
+      @membership = Membership.new(@group_name, @membership.master, [msg.sender])
+      send_message(:committed, msg.sender["port_num"], @round_num)
+      return
+    end
+    @committers = []
+    puts "Ask Request Commit from Other Members}".red
+    @membership.all_nodes.each do |node|
+      if node["port_num"] != @port_num
+        send_message(:confirm_join_request, node["port_num"], @round_num, msg.sender)
+      end
+    end
+  end
+
+  def confirmed_request(msg)
+    puts "Commit the Requst from Master".red
+    send_message(:confirmed_request, msg.sender["port_num"], @round_num, msg.value)
+  end
+
+  def check_comitted(msg)
+    p '1111111111111'
+    if msg.round_num >= @round_num
+      p '2222222222'
+      @committers << msg.sender
+      if has_majority?(@committers.count + 1.5)
+        if msg.value.is_a?(Hash)
+          puts "Commited The Join Request".red
+          send_message(:committed, msg.value["port_num"], @round_num)
+          @round_num = @round_num + 1
+          @membership.slave << msg.value
+          @membership = Membership.new(@group_name, @membership.master, @membership.slave)
+        elsif msg.value.is_a?(Array)
+          puts "Commited Deleting a Faild Node".red
+          @round_num = @round_num + 1
+          @membership = Membership.new(@group_name, @membership.master, msg.value)
+          @repliers = []
+          send_heartbeats
+        end
+        @last_heartbeat = Time.now.to_f
+        @committers = []
+      end
+    end
+  end
+
   def handle_vote(msg)
     @voters += [msg.sender["port_num"]]
     @last_heartbeat = Time.now.to_f
     if has_majority?(@voters.count)
       @state = MASTER
-      slave = @membership.all_nodes.delete_if { |node| node["port_num"] == @port_num}
+      slave = @membership.slave.delete_if { |node| node["port_num"] == @port_num}
       master = {"node_num" => @node_num, "port_num" => @port_num}
       @membership = Membership.new(@group_name, master, slave)
       puts "#{prefix} Win the Election".red
+      @last_heartbeat = Time.now.to_f
+      @committers = []
+      @repliers = []
       send_heartbeats
     end
   end
@@ -136,10 +190,10 @@ class Node
     send_message(:return_membership, msg.sender["port_num"], @round_num, @membership.to_json)
   end
 
-  def confirm_join_request(msg)
-    puts "#{prefix} Conifrm Join Request for Node #{msg.sender["node_num"]}".red
-    send_message(:confirm_join_request, msg.sender["port_num"])
-  end
+  # def confirm_join_request(msg)
+  #   puts "#{prefix} Conifrm Join Request for Node #{msg.sender["node_num"]}".red
+  #   send_message(:confirm_join_request, msg.sender["port_num"])
+  # end
 
 
   def review_last_heartbeat_round(msg)
@@ -151,11 +205,19 @@ class Node
       @repliers = []
       send_heartbeats
     else
-      @membership = Membership.new(@group_name, @membership.master, @repliers)
-      @repliers = []
-      @round_num = @round_num + 1
-      @last_heartbeat = Time.now.to_f
-      send_heartbeats
+      if @membership.total_number == 2
+        @membership = Membership.new(@group_name, @membership.master, [])
+        @repliers = []
+        @committers = []
+        @last_heartbeat = Time.now.to_f
+        send_heartbeats
+        return
+      end
+      @membership.all_nodes.each do |node|
+        if node["port_num"] != @port_num
+          send_message(:confirm_join_request, node["port_num"], @round_num, @repliers)
+        end
+      end
     end
   end
 
@@ -237,6 +299,7 @@ class Node
       msg = nil
       if timeout?
         msg = Message.timeout_message(:timeout, {"node_num" => @node_num, "port_num" => @port_num}, @round_num)
+        @last_heartbeat = Time.now.to_f
       elsif !@task_queue.empty?
         msg = @task_queue.shift
       end
@@ -258,7 +321,7 @@ class Node
 
   def timeout?
     if @state == MASTER
-      Time.now.to_f - @last_heartbeat > rand(0.5...1)*2
+      Time.now.to_f - @last_heartbeat > rand(1...2)*2
     else
       Time.now.to_f - @last_heartbeat > rand(2.5...5)*2
     end

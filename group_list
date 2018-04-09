@@ -1,0 +1,34 @@
+[
+  {
+    "master": {
+      "node_num": "node1",
+      "port_num": "8008"
+    },
+    "slave": [
+      {
+        "node_num": "node3",
+        "port_num": "8010"
+      },
+      {
+        "node_num": "node2",
+        "port_num": "8009"
+      }
+    ],
+    "all_nodes": [
+      {
+        "node_num": "node3",
+        "port_num": "8010"
+      },
+      {
+        "node_num": "node2",
+        "port_num": "8009"
+      },
+      {
+        "node_num": "node1",
+        "port_num": "8008"
+      }
+    ],
+    "total_number": 3,
+    "group_name": "group1"
+  }
+]
