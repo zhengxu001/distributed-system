@@ -1,0 +1,59 @@
+[
+  {
+    "master": {
+      "node_num": "node4",
+      "port_num": "7444"
+    },
+    "slave": [
+
+    ],
+    "all_nodes": [
+      {
+        "node_num": "node4",
+        "port_num": "7444"
+      }
+    ],
+    "total_number": 1,
+    "group_name": "group2"
+  },
+  {
+    "master": {
+      "node_num": "node1",
+      "port_num": "8008"
+    },
+    "slave": [
+      {
+        "node_num": "node2",
+        "port_num": "8009"
+      },
+      {
+        "node_num": "node3",
+        "port_num": "8010"
+      },
+      {
+        "node_num": "node4",
+        "port_num": "7333"
+      }
+    ],
+    "all_nodes": [
+      {
+        "node_num": "node2",
+        "port_num": "8009"
+      },
+      {
+        "node_num": "node3",
+        "port_num": "8010"
+      },
+      {
+        "node_num": "node4",
+        "port_num": "7333"
+      },
+      {
+        "node_num": "node1",
+        "port_num": "8008"
+      }
+    ],
+    "total_number": 4,
+    "group_name": "group1"
+  }
+]

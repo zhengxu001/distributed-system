@@ -1,32 +1,34 @@
+require 'colorize'
 require 'json'
 require 'socket'
 require_relative 'message'
 require_relative 'membership'
+
 Thread.abort_on_exception = true
 MASTER = 'master'
 SLAVE = 'slave'
 CANDIDATE = 'candidate'
 
 class Node
-  attr_accessor :port_num, :state, :server, :membership, :task_queue, :join_group, :repliers, :voters
+  attr_accessor :port_num, :state, :server, :membership, :task_queue, :repliers, :voters, :group_name, :node_num
 
   TRANSITIONS = {
     MASTER => {
       timeout: :review_last_heartbeat_round,
       acknowledgement: :log_heartbeat_reply,
-      # heartbeat: :respond_to_heartbeat,
-      heartbeat: :update_membership,
+      heartbeat: :acknowledgement,
       vote_request: :handle_vote_request,
       ask_for_membership: :return_membership,
+      join_request: :confirm_join_request,
       vote: :already_master,
       grep_membership: :response_membership
     },
     SLAVE => {
       timeout: :launch_candidacy,
-      # heartbeat: :respond_to_heartbeat,
-      heartbeat: :update_membership,
+      heartbeat: :acknowledge_heartbeat,
       vote_request: :handle_vote_request,
       return_membership: :update_membership,
+      confirm_join_request: :acknowledge_heartbeat,
       ask_for_membership: :return_membership,
       vote: :already_slave,
       acknowledgement: :already_slave,
@@ -34,11 +36,9 @@ class Node
     },
     CANDIDATE => {
       timeout: :launch_candidacy,
-      # timeout: :partitioning,
       vote_request: :handle_vote_request,
       vote: :handle_vote,
-      # heartbeat: :respond_to_heartbeat,
-      heartbeat: :update_membership,
+      heartbeat: :acknowledge_heartbeat,
       ask_for_membership: :return_membership,
       acknowledgement: :already_slave,
       grep_membership: :response_membership
@@ -56,101 +56,130 @@ class Node
   end
 
 
-  def initialize(port, join_group=nil)
+  def initialize(node_num, group_name, port, create_group = true)
+    @node_num = node_num
     @port_num = port
+    @group_name = group_name
     @task_queue = Queue.new
     @threads = []
     @server = TCPServer.new(@port_num)
-    if not join_group
+    if create_group == "true"
       @state = MASTER
-      @membership = Membership.new(port)
-    end
-    if join_group
-      @state = SLAVE
-      ask_for_membership(join_group)
+      @round_num = 0
+      if GroupList.list_name.include? group_name
+        Membership.delete_gruop(group_name)
+      end
+      master = {"node_num" => node_num, "port_num" => port}
+      @membership = Membership.new(group_name, master)
+    else
+      if !GroupList.list_name.include? group_name
+        p "No such group existed. Going to create a New Group"
+        @state = MASTER
+        master = Pnode.new(node_num, port)
+        @round_num = 0
+        @membership = Membership.new(group_name, master)
+      else
+        @round_num = -1
+        @state = SLAVE
+        join_request(group_name)
+      end
     end
     @last_heartbeat = Time.now.to_f
-    @round_num = 0
     @repliers = []
     @voters = []
   end
 
+  def send_heartbeats
+    puts "#{prefix} Send Heartbeat To Slaves".blue
+    @membership.all_nodes.each do |node|
+      if node["port_num"] != @port_num
+        send_message(:heartbeat, node["port_num"], @round_num)
+      end
+    end
+  end
+
   def handle_vote_request(msg)
-    p("handle_vote_request msg.round_num: #{msg.round_num}")
-    p("handle_vote_request @round_num #{@round_num}")
     if msg.round_num > @round_num
-      send_message(:vote, msg.sender, msg.round_num)
+      send_message(:vote, msg.sender["port_num"], msg.round_num)
       @state = SLAVE
       @last_heartbeat = Time.now.to_f
       @round_num = msg.round_num
+      puts "#{prefix} Vote For #{msg.sender["port_num"]}".blue
     end
   end
 
   def handle_vote(msg)
-    @voters += [msg.sender]
+    @voters += [msg.sender["port_num"]]
     @last_heartbeat = Time.now.to_f
     if has_majority?(@voters.count)
       @state = MASTER
-      @membership.master = @port_num
-      @membership.slave = @membership.slave - [@port_num]
-      @membership.update
+      slave = @membership.all_nodes.delete_if { |node| node["port_num"] == @port_num}
+      master = {"node_num" => @node_num, "port_num" => @port_num}
+      @membership = Membership.new(@group_name, master, slave)
+      puts "#{prefix} Win the Election".red
       send_heartbeats
     end
   end
 
   def update_membership(msg)
-    raw_membership = JSON.parse msg.value
-    @membership = Membership.new(raw_membership["master"], raw_membership["slave"])
-    @round_num = msg.round_num
-    respond_to_heartbeat(msg)
+    raw_membership = msg.value
+    if msg.round_num >= @round_num
+      puts "#{prefix} Updating Local Membership".blue
+      @membership = Membership.new(@group_name, raw_membership["master"], raw_membership["slave"])
+      @round_num = msg.round_num
+      # acknowledge_heartbeat(msg)
+    end
   end
 
+  def return_membership(msg)
+    puts "#{prefix} Sync Membership To Node #{msg.sender["port_num"]}".blue
+    send_message(:return_membership, msg.sender["port_num"], @round_num, @membership.to_json)
+  end
+
+  def confirm_join_request(msg)
+    puts "#{prefix} Conifrm Join Request for Node #{msg.sender["node_num"]}".red
+    send_message(:confirm_join_request, msg.sender["port_num"])
+  end
+
+
   def review_last_heartbeat_round(msg)
-    ack_count = @repliers.size + 1
-    p("reply is #{@repliers}")
+    ack_count = @repliers.size + 1.5
     if !has_majority?(ack_count)
       launch_candidacy(msg)
-    else
-      @membership.slave = @repliers
+    elsif @repliers.size == @membership.slave_nodes.size
+      @last_heartbeat = Time.now.to_f
       @repliers = []
-      @membership.update
+      send_heartbeats
+    else
+      @membership = Membership.new(@group_name, @membership.master, @repliers)
+      @repliers = []
+      @round_num = @round_num + 1
       @last_heartbeat = Time.now.to_f
       send_heartbeats
     end
   end
 
   def launch_candidacy(msg)
-    p("launch_candidacy #{@membership.all_nodes}")
+    puts "#{prefix} Becaming Candidate".red
     @voters = [@port_num]
     @round_num =  @round_num + 1
     @state = CANDIDATE
     @last_heartbeat = Time.now.to_f
-    (@membership.all_nodes - [@port_num]).each do |port|
-      send_message(:vote_request, port, @round_num)
-    end
-  end
-
-  def partitioning(msg)
-    p("Start Send Heartbeat to voters #{@voters - [@port_num]}")
-    @state = MASTER
-    @membership.master = @port_num
-    @membership.slave = @voters - [@port_num]
-    @membership.update
-    @last_heartbeat = Time.now.to_f
-    @membership.slave.each do |port|
-      send_message(:heartbeat, port, @round_num, @membership.to_json)
+    @membership.all_nodes.each do |node|
+      if node["port_num"] != @port_num
+        send_message(:vote_request, node["port_num"], @round_num)
+      end
     end
   end
 
   def send_message(message, recipient_port, round_num=@round_num, value=nil)
-      p "recipient_port #{recipient_port}"
-      socket = TCPSocket.new('localhost', recipient_port)
-      message = Message.new(message, @port_num, round_num, value)
-      p "start sending message #{message.to_json}"
-      socket.puts(message.to_json)
-      socket.close
+    socket = TCPSocket.new('localhost', recipient_port)
+    sender = {"node_num" => @node_num, "port_num" => @port_num}
+    message = Message.new(message, sender, round_num, value)
+    socket.puts(message.to_json)
+    socket.close
   rescue => e
-    p e
+    puts e.to_s.red
     if(e.message.include? "Connection refused")
       @membership.all_nodes = @membership.all_nodes - [recipient_port]
     end
@@ -159,56 +188,37 @@ class Node
   def log_heartbeat_reply(msg)
     @repliers << msg.sender
     @repliers.uniq!
-    # @round_num = msg.round_num
+    if msg.round_num < @round_num
+      return_membership(msg)
+    end
   end
 
-  def add_new_node(port)
-    @membership.slave << port
-    # @membership.all_nodes = (@membership.slave <<  @membership.master)
-    # @membership.total_number = @membership.all_nodes.uniq.size
-
-    # p @membership
-    # @membership.slave = @membership.slave.uniq!
+  def join_request(group_name)
+    puts("#{prefix} Request Join To: #{group_name}".red)
+    recipient_port = nil
+    GroupList.list.each do |group|
+      if group["group_name"] == group_name
+        recipient_port = group["master"]["port_num"]
+      end
+    end
+    send_message(:join_request, recipient_port)
   end
 
-
-  def ask_for_membership(recipient_port)
-    p("ask_for_membership from: ", recipient_port)
+  def ask_for_membership(group_name)
+    puts("New Node Ask For Membership From: #{group_name}".red)
+    recipient_port = nil
+    GroupList.list.each do |group|
+      if group["group_name"] == group_name
+        recipient_port = group["master"]["port_num"]
+      end
+    end
     send_message(:ask_for_membership, recipient_port)
   end
 
-  def grep_membership(recipient_port)
-    p("grep membership from: ", recipient_port)
-    send_message(:grep_membership, recipient_port)
-  end
-
-  def get_membership(msg)
-    p "get_membership"
-    v = JSON.parse msg["value"]
-    @membership = Membership.new(v['master'], v['slave'])
-    p "got membership"
-    p @membership
-  end
-
-  def return_membership(msg)
-    p "return_membership to #{msg.sender}"
-    send_message(:return_membership, msg.sender, @round_num, @membership.to_json)
-    add_new_node(msg.sender)
-  end
-
-  def response_membership(msg)
-    p "response_membership to #{msg.sender}"
-    send_message(:response_membership, msg.sender, @round_num, @membership.to_json)
-  end
-
-
-  def respond_to_heartbeat(msg)
-    if msg.round_num >= @round_num
-      @last_heartbeat = Time.now.to_f
-      @state = SLAVE
-      @round_num = msg.round_num
-      send_message(:acknowledgement, msg.sender)
-    end
+  def acknowledge_heartbeat(msg)
+    puts "#{prefix} Acknowledgement To Master".blue
+    @last_heartbeat = Time.now.to_f
+    send_message(:acknowledgement, msg.sender["port_num"])
   end
 
   def listen
@@ -225,14 +235,14 @@ class Node
     loop do
       msg = nil
       if timeout?
-        msg = Message.timeout_message(:timeout, @port_num, @round_num)
+        msg = Message.timeout_message(:timeout, {"node_num" => "node1", "port_num" => @port_num}, @round_num)
       elsif !@task_queue.empty?
         msg = @task_queue.shift
       end
 
       if msg
         method_name = TRANSITIONS[@state][msg.type.to_sym]
-        p("msg.type is #{msg.type}")
+        puts  "#{prefix}: Processing #{msg.type} from #{msg.sender["node_num"]}".blue
         send(method_name, msg)
       else
         sleep 0.1
@@ -241,76 +251,37 @@ class Node
     end
   end
 
+  def prefix
+    "[#{@state}, #{@round_num}, #{@node_num}, #{@group_name}]"
+  end
+
   def timeout?
     if @state == MASTER
       Time.now.to_f - @last_heartbeat > rand(0.6...1.2)*2
-    # elsif @state == SLAVE
-      # Time.now.to_f - @last_heartbeat > (2.2 + rand(0.1...2.1))
     else
       Time.now.to_f - @last_heartbeat > rand(2.4...4.2)*2
-      # Time.now.to_f - @last_heartbeat > 8
     end
-  end
-
-  def send_heartbeats
-    p("Start Send Heartbeat to Slaves #{@membership.slave}")
-    (@membership.all_nodes - [@port_num]).each do |port|
-      send_message(:heartbeat, port, @round_num, @membership.to_json)
-    end
-  end
-
-  def show_membership
-    global_puts @membership
-  end
-
-  def add_new_member(port)
-    @membership.slave << port
-    sync_membership
-  end
-
-  def sync_membership
-    @membership.slave.each do |port|
-      global_puts "send_membership_to all the ports"
-      send_message(:return_membership, port, @round_num, @membership)
-    end
-  end
-
-  def ask_for_vote
-    
-  end
-
-  def give_vote
-    
   end
 
   def run
     t1 = Thread.new { listen }
     t2 = Thread.new { react }
     @threads = [t1, t2]
-    p "join threads"
     @threads.each(&:join)
   end
 
+  def new_threads
+    t1 = Thread.new { listen }
+    t2 = Thread.new { react }
+    return [t1, t2]
+  end
+
   def has_majority?(count)
-    count >= (@membership.all_nodes.size / 2) + 1
+    if @membership.all_nodes.size == 2 && count >=1
+      return true
+    end
+    count >= (@membership.all_nodes.size / 2) + 0.5
   end
 end
-
-
-
-# DEBUG_QUEUE = Queue.new
-
-# def global_puts(msg)
-#   DEBUG_QUEUE.push(msg)
-#   DEBUG_QUEUE.push(global_state)
-# end
-
-# ARGV.each do|a|
-#   puts "Argument: #{a}"
-# end
-
-a = Node.new(ARGV[0], ARGV[1])
-a.run
-
 
 

@@ -32,4 +32,19 @@ class Message
   # end
 end
 
+class Pnode
+  attr_accessor :node_num, :port
+
+  def initialize(node_num, port)
+    @node_num = node_num
+    @port = port
+  end
+
+  def to_json
+    {
+      node_num: @node_num,
+      port: @port
+    }
+  end
+end
 
