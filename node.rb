@@ -10,7 +10,7 @@ SLAVE = 'slave'
 CANDIDATE = 'candidate'
 
 class Node
-  attr_accessor :port_num, :state, :server, :membership, :task_queue, :repliers, :voters, :group_name, :node_num, :committers
+  attr_accessor :port_num, :state, :server, :membership, :task_queue, :repliers, :voters, :group_name, :node_num, :committers, :request_queue
 
   TRANSITIONS = {
     MASTER => {
@@ -65,6 +65,7 @@ class Node
     @group_name = group_name
     @task_queue = Queue.new
     @threads = []
+    @request_queue = []
     @server = TCPServer.new(@port_num)
     if create_group == "true"
       @state = MASTER
@@ -135,27 +136,27 @@ class Node
   end
 
   def check_comitted(msg)
-    p '1111111111111'
     if msg.round_num >= @round_num
-      p '2222222222'
       @committers << msg.sender
-      if has_majority?(@committers.count + 1.5)
-        if msg.value.is_a?(Hash)
-          puts "Commited The Join Request".red
-          send_message(:committed, msg.value["port_num"], @round_num)
-          @round_num = @round_num + 1
-          @membership.slave << msg.value
-          @membership = Membership.new(@group_name, @membership.master, @membership.slave)
-        elsif msg.value.is_a?(Array)
-          puts "Commited Deleting a Faild Node".red
-          @round_num = @round_num + 1
-          @membership = Membership.new(@group_name, @membership.master, msg.value)
-          @repliers = []
-          send_heartbeats
-        end
-        @last_heartbeat = Time.now.to_f
+    end
+    p 
+    if has_majority?(@committers.count + 1.5)
+      if msg.value.is_a?(Hash)
+        puts "Commited The Join Requests".red
+        send_message(:committed, msg.value["port_num"], @round_num)
+        @round_num = @round_num + 1
+        @membership.slave << msg.value
+        @membership = Membership.new(@group_name, @membership.master, @membership.slave)
+      elsif msg.value.is_a?(Array)
+        puts "Commited Deleting Faild Nodes".red
+        @round_num = @round_num + 1
+        @membership = Membership.new(@group_name, @membership.master, msg.value)
+        # @repliers = []
         @committers = []
+        # send_heartbeats
       end
+      # @last_heartbeat = Time.now.to_f
+      # @committers = []
     end
   end
 
@@ -213,6 +214,7 @@ class Node
         send_heartbeats
         return
       end
+      @committers = []
       @membership.all_nodes.each do |node|
         if node["port_num"] != @port_num
           send_message(:confirm_join_request, node["port_num"], @round_num, @repliers)
@@ -344,7 +346,7 @@ class Node
     if @membership.all_nodes.size == 2 && count >=1
       return true
     end
-    count >= (@membership.all_nodes.size / 2) + 0.5
+    count >= (@membership.all_nodes.size + 1) / 2
   end
 end
 
