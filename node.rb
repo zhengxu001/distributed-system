@@ -21,8 +21,7 @@ class Node
       ask_for_membership: :return_membership,
       join_request: :confirm_join_request,
       confirmed_request: :check_comitted,
-      vote: :already_master,
-      grep_membership: :response_membership
+      vote: :already_master
     },
     SLAVE => {
       timeout: :launch_candidacy,
@@ -33,8 +32,7 @@ class Node
       committed: :acknowledge_heartbeat,
       ask_for_membership: :return_membership,
       vote: :already_slave,
-      acknowledgement: :already_slave,
-      grep_membership: :response_membership
+      acknowledgement: :already_slave
     },
     CANDIDATE => {
       timeout: :launch_candidacy,
@@ -43,8 +41,7 @@ class Node
       confirm_join_request: :confirmed_request,
       heartbeat: :acknowledge_heartbeat,
       ask_for_membership: :return_membership,
-      acknowledgement: :already_slave,
-      grep_membership: :response_membership
+      acknowledgement: :already_slave
     },
   }
 

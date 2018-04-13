@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2017.12.9)  11 APR 2018 15:21
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017) (preloaded format=pdflatex 2017.12.9)  12 APR 2018 21:50
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -155,19 +155,19 @@ Package: ifxetex 2010/09/12 v0.6 Provides ifxetex conditional
 (./report.aux)
 \openout1 = `report.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 21.
-LaTeX Font Info:    ... okay on input line 21.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 21.
-LaTeX Font Info:    ... okay on input line 21.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 21.
-LaTeX Font Info:    ... okay on input line 21.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 21.
-LaTeX Font Info:    ... okay on input line 21.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 21.
-LaTeX Font Info:    ... okay on input line 21.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 21.
-LaTeX Font Info:    ... okay on input line 21.
-LaTeX Font Info:    Try loading font information for OT1+ptm on input line 21.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 27.
+LaTeX Font Info:    ... okay on input line 27.
+LaTeX Font Info:    Try loading font information for OT1+ptm on input line 27.
  (/usr/local/texlive/2017/texmf-dist/tex/latex/psnfss/ot1ptm.fd
 File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
 )
@@ -264,49 +264,142 @@ e
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-Missing character: There is no ‚ in font ptmr7t!
-Missing character: There is no Ä in font ptmr7t!
-Missing character: There is no ô in font ptmr7t!
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <12> on input line 22.
+(Font)              <12> on input line 28.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 22.
+(Font)              <8> on input line 28.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 22.
-LaTeX Font Info:    Try loading font information for OT1+pcr on input line 22.
+(Font)              <6> on input line 28.
+LaTeX Font Info:    Try loading font information for OT1+pcr on input line 28.
 (/usr/local/texlive/2017/texmf-dist/tex/latex/psnfss/ot1pcr.fd
 File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 )
-LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 25.
-LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10.95> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 29.
 LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <14.4> not available
-(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 31.
- (./report.bbl
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 30.
+ (./report.toc
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <10.95> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 1.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <10.95> on input line 2.
+)
+\tf@toc=\write3
+\openout3 = `report.toc'.
 
-Package natbib Warning: Empty `thebibliography' environment on input line 3.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <12> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 33.
 
-) [1
+[1
 
 {/usr/local/texlive/2017/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
-(./report.aux) ) 
+LaTeX Font Info:    Try loading font information for OMS+ptm on input line 36.
+
+(/usr/local/texlive/2017/texmf-dist/tex/latex/psnfss/omsptm.fd
+File: omsptm.fd 
+)
+LaTeX Font Info:    Font shape `OMS/ptm/m/n' in size <10.95> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 36.
+Missing character: There is no „ in font ptmr7t!
+Missing character: There is no Ä in font ptmr7t!
+Missing character: There is no Ç in font ptmr7t!
+ [2] [3]
+<assets/architectureDiagram.png, id=16, 824.07875pt x 575.14874pt>
+File: assets/architectureDiagram.png Graphic file (type png)
+
+<use assets/architectureDiagram.png>
+Package pdftex.def Info: assets/architectureDiagram.png used on input line 97.
+(pdftex.def)             Requested size: 494.45107pt x 345.0919pt.
+
+Overfull \hbox (39.20695pt too wide) in paragraph at lines 97--98
+ [][] 
+ []
+
+Missing character: There is no ¬ in font ptmr7t!
+Missing character: There is no † in font ptmr7t!
+[4] [5 <./assets/architectureDiagram.png>]
+Missing character: There is no ‚ in font ptmr7t!
+Missing character: There is no Ä in font ptmr7t!
+Missing character: There is no ú in font ptmr7t!
+Missing character: There is no ‚ in font ptmr7t!
+Missing character: There is no Ä in font ptmr7t!
+Missing character: There is no ù in font ptmr7t!
+
+<assets/roleChange.png, id=25, 809.0225pt x 612.2875pt>
+File: assets/roleChange.png Graphic file (type png)
+
+<use assets/roleChange.png>
+Package pdftex.def Info: assets/roleChange.png used on input line 116.
+(pdftex.def)             Requested size: 323.60327pt x 244.91066pt.
+ [6 <./assets/roleChange.png>] [7]
+<assets/nodeJoin.png, id=34, 750.805pt x 493.845pt>
+File: assets/nodeJoin.png Graphic file (type png)
+ <use assets/nodeJoin.png>
+Package pdftex.def Info: assets/nodeJoin.png used on input line 154.
+(pdftex.def)             Requested size: 375.40158pt x 246.92189pt.
+
+<assets/election.png, id=35, 600.2425pt x 567.11874pt>
+File: assets/election.png Graphic file (type png)
+
+<use assets/election.png>
+Package pdftex.def Info: assets/election.png used on input line 167.
+(pdftex.def)             Requested size: 360.14827pt x 340.27386pt.
+ [8 <./assets/nodeJoin.png>] [9 <./assets/election.png>] [10]
+Missing character: There is no ‚ in font ptmr7t!
+Missing character: There is no Ä in font ptmr7t!
+Missing character: There is no ò in font ptmr7t!
+ [11] [12]
+Underfull \hbox (badness 10000) in paragraph at lines 298--298
+[]|\OT1/ptm/m/n/10.95 Studied mul-ti-cast al-go-rithm
+ []
+
+
+Underfull \hbox (badness 1163) in paragraph at lines 298--298
+\OT1/ptm/m/n/10.95 ber for the project and taken
+ []
+
+
+Underfull \hbox (badness 4819) in paragraph at lines 298--298
+\OT1/ptm/m/n/10.95 team. Im-ple-mented project
+ []
+
+
+Underfull \hbox (badness 3907) in paragraph at lines 298--298
+\OT1/ptm/m/n/10.95 through mul-ti-cast in java to
+ []
+
+
+Underfull \hbox (badness 1888) in paragraph at lines 298--298
+\OT1/ptm/m/n/10.95 on fail-ure tol-er-ance in-clud-ing
+ []
+
+
+Underfull \hbox (badness 1102) in paragraph at lines 300--300
+\OT1/ptm/m/n/10.95 mem-ber and taken knowl-edge
+ []
+
+
+Underfull \hbox (badness 1910) in paragraph at lines 300--300
+\OT1/ptm/m/n/10.95 to Fail-ure tol-er-ance in-clud-ing
+ []
+
+[13] (./report.bbl [14]) [15] (./report.aux) ) 
 Here is how much of TeX's memory you used:
- 3404 strings out of 492995
- 48122 string characters out of 6132704
- 120122 words of memory out of 5000000
- 6903 multiletter control sequences out of 15000+600000
- 18916 words of font info for 41 fonts, out of 8000000 for 9000
+ 3457 strings out of 492995
+ 49150 string characters out of 6132704
+ 124219 words of memory out of 5000000
+ 6943 multiletter control sequences out of 15000+600000
+ 19631 words of font info for 43 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 39i,6n,32p,966b,259s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/local/texlive/2017/texmf-dist/fonts/enc/dvips/base/8r.enc
-}</usr/local/texlive/2017/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb></usr/l
-ocal/texlive/2017/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texli
-ve/2017/texmf-dist/fonts/type1/urw/times/utmr8a.pfb>
-Output written on report.pdf (1 page, 37534 bytes).
+ 39i,8n,32p,921b,306s stack positions out of 5000i,500n,10000p,200000b,80000s
+{/usr/local/texlive/2017/texmf-di
+st/fonts/enc/dvips/base/8r.enc}</usr/local/texlive/2017/texmf-dist/fonts/type1/
+public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/u
+rw/courier/ucrr8a.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/urw/times
+/utmb8a.pfb></usr/local/texlive/2017/texmf-dist/fonts/type1/urw/times/utmr8a.pf
+b></usr/local/texlive/2017/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
+Output written on report.pdf (15 pages, 629470 bytes).
 PDF statistics:
- 21 PDF objects out of 1000 (max. 8388607)
- 14 compressed objects within 1 object stream
+ 83 PDF objects out of 1000 (max. 8388607)
+ 52 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 1 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 21 words of extra memory for PDF output out of 10000 (max. 10000000)
 
