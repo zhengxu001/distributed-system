@@ -1,3 +1,42 @@
 [
-
+  {
+    "master": {
+      "node_num": "node1",
+      "port_num": "9009"
+    },
+    "slave": [
+      {
+        "node_num": "node5",
+        "port_num": "9013"
+      },
+      {
+        "node_num": "node4",
+        "port_num": "9012"
+      },
+      {
+        "node_num": "node2",
+        "port_num": "9010"
+      }
+    ],
+    "all_nodes": [
+      {
+        "node_num": "node5",
+        "port_num": "9013"
+      },
+      {
+        "node_num": "node4",
+        "port_num": "9012"
+      },
+      {
+        "node_num": "node2",
+        "port_num": "9010"
+      },
+      {
+        "node_num": "node1",
+        "port_num": "9009"
+      }
+    ],
+    "total_number": 4,
+    "group_name": "group1"
+  }
 ]

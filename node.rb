@@ -19,7 +19,7 @@ class Node
       heartbeat: :acknowledgement,
       vote_request: :handle_vote_request,
       ask_for_membership: :return_membership,
-      join_request: :confirm_join_request,
+      join_request: :queue_confirm_join_request,
       confirmed_request: :check_comitted,
       vote: :already_master,
       grep_membership: :response_membership
@@ -65,7 +65,7 @@ class Node
     @group_name = group_name
     @task_queue = Queue.new
     @threads = []
-    @request_queue = []
+    @request_queue = Queue.new
     @server = TCPServer.new(@port_num)
     if create_group == "true"
       @state = MASTER
@@ -101,6 +101,14 @@ class Node
         send_message(:heartbeat, node["port_num"], @round_num)
       end
     end
+    if  @request_queue.size > 0
+      p "HHHHHHHHHHHHHHHHHHHHHHHHH"
+      p @request_queue.size
+      request_msg = @request_queue.pop
+      p request_msg
+      p @request_queue.size
+      confirm_join_request(request_msg)
+    end
   end
 
   def handle_vote_request(msg)
@@ -111,6 +119,11 @@ class Node
       @round_num = msg.round_num
       puts "#{prefix} Vote For #{msg.sender["port_num"]}".blue
     end
+  end
+
+  def queue_confirm_join_request(msg)
+    puts "QUEUE Request".red
+    @request_queue << msg
   end
 
   def confirm_join_request(msg)
@@ -324,9 +337,9 @@ class Node
 
   def timeout?
     if @state == MASTER
-      Time.now.to_f - @last_heartbeat > rand(1...2)*2
+      Time.now.to_f - @last_heartbeat > 1*2
     else
-      Time.now.to_f - @last_heartbeat > rand(2.5...5)*2
+      Time.now.to_f - @last_heartbeat > rand(3...6)*2
     end
   end
 
