@@ -10,7 +10,7 @@ SLAVE = 'slave'
 CANDIDATE = 'candidate'
 
 class Node
-  attr_accessor :port_num, :state, :server, :membership, :task_queue, :repliers, :voters, :group_name, :node_num, :committers, :request_queue
+  attr_accessor :port_num, :state, :server, :membership, :task_queue, :repliers, :voters, :group_name, :node_num, :committers, :request_queue, :created_time
 
   TRANSITIONS = {
     MASTER => {
@@ -62,6 +62,9 @@ class Node
   def initialize(node_num, group_name, port, create_group = false)
     @node_num = node_num
     @port_num = port
+    zoned_time = Time.now
+    unzoned_time = Time.new(zoned_time.strftime("%Y").to_i,zoned_time.strftime("%m").to_i,zoned_time.strftime("%d").to_i,zoned_time.strftime("%H").to_i,zoned_time.strftime("%M").to_i,zoned_time.strftime("%S").to_i,"+00:00")
+    @created_time = unzoned_time
     @group_name = group_name
     @task_queue = Queue.new
     @threads = []
@@ -102,11 +105,7 @@ class Node
       end
     end
     if  @request_queue.size > 0
-      p "HHHHHHHHHHHHHHHHHHHHHHHHH"
-      p @request_queue.size
       request_msg = @request_queue.pop
-      p request_msg
-      p @request_queue.size
       confirm_join_request(request_msg)
     end
   end
@@ -332,7 +331,7 @@ class Node
   end
 
   def prefix
-    "[#{@state}, #{@round_num}, #{@node_num}, #{@group_name}]"
+    "[#{@state}, #{@round_num}, #{@node_num}, #{@group_name}, Created_time: #{created_time}]"
   end
 
   def timeout?
